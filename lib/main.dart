@@ -1,4 +1,11 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:iggirl_flutter_app/model/links.dart';
+
+import 'model/post.dart';
 
 void main() {
   runApp(MyApp());
@@ -43,10 +50,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  List<Link> _listLink;
+
+  List<Post> _listPost = new List();
+
+  @override
+  void initState() {
+    super.initState();
+    loadPosts(5);
   }
 
   @override
@@ -55,29 +66,98 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: ListView.builder(
+          itemCount: _listPost.length, itemBuilder: buildPostView),
     );
   }
 
   Widget buildPostView(BuildContext context, int index) {
-    return Column();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+            padding: EdgeInsets.only(
+                left: 10.0, top: 15.0, bottom: 7.0, right: 10.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                    width: 35.0,
+                    height: 35.0,
+                    decoration: new BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: new DecorationImage(
+                            fit: BoxFit.fill,
+                            image: new NetworkImage(_listPost[index].avatar)))),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 15.0),
+                    child: Text(
+                      _listPost[index].name,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    showCupertinoModalPopup(
+                        context: context,
+                        builder: (context) => CupertinoActionSheet(
+                              actions: <Widget>[
+                                CupertinoActionSheetAction(
+                                  child: Text("Save Image"),
+                                  onPressed: () {},
+                                ),
+                                CupertinoActionSheetAction(
+                                  child: Text("Share Image"),
+                                  onPressed: () {},
+                                ),
+                              ],
+                              cancelButton: CupertinoActionSheetAction(
+                                child: Text("Cancel"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ));
+                  },
+                  child: Icon(Icons.more_vert),
+                )
+              ],
+            )),
+        InkWell(
+          onTap: () {},
+          child: Image(
+            image: NetworkImage(_listPost[index].img),
+            fit: BoxFit.fitWidth,
+          ),
+        ),
+      ],
+    );
+  }
+
+  loadPosts(int number) async {
+    Client client = new Client();
+    if (_listLink == null) {
+      _listLink = await Database().fetchLinks(client);
+    }
+    List<Link> postLinks = _listLink.skip(_counter).take(number).toList();
+    try {
+      postLinks.forEach((element) async {
+        var response = await client
+            .get("https://api.instagram.com/oembed/?url=" + element.uri);
+        var value = json.decode(response.body);
+        setState(() {
+          _listPost.add(new Post(
+              value["author_name"].toString(),
+              "https://i.pinimg.com/originals/a2/5f/4f/a25f4f58938bbe61357ebca42d23866f.png",
+              element.uri + "/media/?size=l"));
+        });
+      });
+    } catch (ex) {
+      throw (ex);
+    } finally {
+      _counter += number;
+    }
   }
 }
