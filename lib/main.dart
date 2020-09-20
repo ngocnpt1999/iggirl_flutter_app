@@ -145,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
         InkWell(
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ImageView(_listPost[index].img)));
+                builder: (context) => ImageViewPage(_listPost[index].img)));
           },
           child: CachedNetworkImage(
             imageUrl: _listPost[index].img,
