@@ -1,14 +1,20 @@
 import 'dart:convert';
-
+import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
-import 'package:iggirl_flutter_app/model/links.dart';
-
-import 'model/post.dart';
+import 'package:iggirl_flutter_app/imageView.dart';
+import 'package:iggirl_flutter_app/model/database.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
+import 'package:random_string/random_string.dart';
+import 'package:share/share.dart';
 
 void main() {
-  runApp(MyApp());
+  Database().init();
 }
 
 class MyApp extends StatelessWidget {
@@ -18,19 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'IGGirl'),
@@ -50,14 +44,30 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  List<Link> _listLink;
+  bool _isBusy = true;
 
   List<Post> _listPost = new List();
+
+  ScrollController _scrollController = new ScrollController();
 
   @override
   void initState() {
     super.initState();
-    loadPosts(5);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        if (_isBusy == false) {
+          _loadNewPosts(5);
+        }
+      }
+    });
+    _loadNewPosts(5);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,7 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: ListView.builder(
-          itemCount: _listPost.length, itemBuilder: buildPostView),
+          controller: _scrollController,
+          itemCount: _listPost.length,
+          itemBuilder: buildPostView),
     );
   }
 
@@ -105,12 +117,17 @@ class _MyHomePageState extends State<MyHomePage> {
                         builder: (context) => CupertinoActionSheet(
                               actions: <Widget>[
                                 CupertinoActionSheetAction(
-                                  child: Text("Save Image"),
-                                  onPressed: () {},
+                                  child: Text("Lưu hình ảnh"),
+                                  onPressed: () {
+                                    _saveImage(_listPost[index].img);
+                                  },
                                 ),
                                 CupertinoActionSheetAction(
-                                  child: Text("Share Image"),
-                                  onPressed: () {},
+                                  child: Text("Chia sẻ liên kết"),
+                                  onPressed: () {
+                                    Share.share(_listPost[index].img);
+                                    Navigator.of(context).pop();
+                                  },
                                 ),
                               ],
                               cancelButton: CupertinoActionSheetAction(
@@ -126,9 +143,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             )),
         InkWell(
-          onTap: () {},
-          child: Image(
-            image: NetworkImage(_listPost[index].img),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ImageView(_listPost[index].img)));
+          },
+          child: CachedNetworkImage(
+            imageUrl: _listPost[index].img,
+            placeholder: (context, url) => Image(
+              image: AssetImage("assets/images/white.png"),
+              fit: BoxFit.fitWidth,
+            ),
             fit: BoxFit.fitWidth,
           ),
         ),
@@ -136,28 +160,59 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  loadPosts(int number) async {
+  void _loadNewPosts(int number) async {
+    _isBusy = true;
     Client client = new Client();
-    if (_listLink == null) {
-      _listLink = await Database().fetchLinks(client);
-    }
-    List<Link> postLinks = _listLink.skip(_counter).take(number).toList();
+    List<Link> news = Database().links.skip(_counter).take(number).toList();
     try {
-      postLinks.forEach((element) async {
+      for (int i = 0; i < news.length; i++) {
         var response = await client
-            .get("https://api.instagram.com/oembed/?url=" + element.uri);
-        var value = json.decode(response.body);
-        setState(() {
-          _listPost.add(new Post(
-              value["author_name"].toString(),
-              "https://i.pinimg.com/originals/a2/5f/4f/a25f4f58938bbe61357ebca42d23866f.png",
-              element.uri + "/media/?size=l"));
-        });
-      });
+            .get("https://api.instagram.com/oembed/?url=" + news[i].uri);
+        if (response.statusCode == 200) {
+          var value = json.decode(response.body);
+          Future.delayed(const Duration(milliseconds: 500), () {
+            setState(() {
+              _listPost.add(new Post(
+                  value["author_name"].toString(),
+                  "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+                  news[i].uri + "/media/?size=l"));
+            });
+          });
+        }
+      }
     } catch (ex) {
+      print(ex);
       throw (ex);
     } finally {
       _counter += number;
+      print("Counter: $_counter");
+      _isBusy = false;
     }
+  }
+
+  void _saveImage(String uri) async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    } else {
+      var response = await Dio()
+          .get(uri, options: Options(responseType: ResponseType.bytes));
+      var result;
+      ImageGallerySaver.saveImage(Uint8List.fromList(response.data),
+              quality: 100, name: randomString(15))
+          .then((value) => result = value)
+          .whenComplete(() {
+        if (["", null, false, 0].contains(result)) {
+          Fluttertoast.showToast(
+            msg: "Lưu thất bại",
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: "Lưu thành công",
+          );
+        }
+      });
+    }
+    Navigator.of(context).pop();
   }
 }

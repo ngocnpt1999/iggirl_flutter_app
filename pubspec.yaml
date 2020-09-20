@@ -21,7 +21,14 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  share: ^0.6.5+1
+  cached_network_image: ^2.3.2+1
+  random_string: ^2.1.0
+  permission_handler: ^5.0.1+1
+  image_gallery_saver: ^1.5.0
+  dio: ^3.0.10
   http: ^0.12.2
+  fluttertoast: ^7.1.1
   flutter:
     sdk: flutter
 
@@ -39,6 +46,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  assets:
+    - assets/images/white.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
