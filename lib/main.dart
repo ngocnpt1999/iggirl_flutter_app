@@ -164,8 +164,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _isBusy = true;
     Client client = new Client();
     List<Link> news = Database().links.skip(_counter).take(number).toList();
-    try {
-      for (int i = 0; i < news.length; i++) {
+
+    for (int i = 0; i < news.length; i++) {
+      try {
         var response = await client
             .get("https://api.instagram.com/oembed/?url=" + news[i].uri);
         if (response.statusCode == 200) {
@@ -179,15 +180,14 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           });
         }
+      } catch (ex) {
+        print(ex);
+        continue;
       }
-    } catch (ex) {
-      print(ex);
-      throw (ex);
-    } finally {
-      _counter += number;
-      print("Counter: $_counter");
-      _isBusy = false;
     }
+    _counter += number;
+    print("Counter: $_counter");
+    _isBusy = false;
   }
 
   void _saveImage(String uri) async {
