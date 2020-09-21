@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
+import 'package:iggirl_flutter_app/control/imageAliveView.dart';
 import 'package:iggirl_flutter_app/imageView.dart';
 import 'package:iggirl_flutter_app/model/database.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -166,14 +166,7 @@ class _MyHomePageState extends State<MyHomePage>
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ImageViewPage(_listPost[index].img)));
           },
-          child: CachedNetworkImage(
-            imageUrl: _listPost[index].img,
-            placeholder: (context, url) => Image(
-              image: AssetImage("assets/images/white.png"),
-              fit: BoxFit.fitWidth,
-            ),
-            fit: BoxFit.fitWidth,
-          ),
+          child: ImageAliveView(_listPost[index].img),
         ),
       ],
     );

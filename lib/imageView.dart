@@ -22,6 +22,11 @@ class ImageViewPageState extends State<ImageViewPage> {
   ImageViewPageState(this._img);
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
