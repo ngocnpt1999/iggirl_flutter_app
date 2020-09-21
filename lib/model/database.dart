@@ -1,8 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
-import 'package:iggirl_flutter_app/main.dart';
 
 class Link {
   String uri;
@@ -29,13 +27,10 @@ class Database {
 
   List<Link> links;
 
-  void init() {
+  Future<List<Link>> init() async {
     Client client = new Client();
-    _fetchLinks(client)
-        .then((List<Link> value) => links = value)
-        .whenComplete(() {
-      runApp(MyApp());
-    });
+    links = await _fetchLinks(client);
+    return links;
   }
 
   List<Link> _shuffleLinks(List<Link> items) {

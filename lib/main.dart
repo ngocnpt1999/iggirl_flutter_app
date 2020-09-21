@@ -15,7 +15,7 @@ import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
-  Database().init();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -67,7 +67,9 @@ class _MyHomePageState extends State<MyHomePage>
         }
       }
     });
-    _loadNewPosts(5);
+    Database().init().whenComplete(() {
+      _loadNewPosts(5);
+    });
   }
 
   @override
