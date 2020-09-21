@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:dio/dio.dart';
 import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   Database().init();
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -41,7 +43,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with AutomaticKeepAliveClientMixin<MyHomePage> {
   int _counter = 0;
 
   bool _isBusy = true;
@@ -49,6 +52,9 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Post> _listPost = new List();
 
   ScrollController _scrollController = new ScrollController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -72,11 +78,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: ListView.builder(
+          cacheExtent: 1000.0,
+          addAutomaticKeepAlives: true,
           controller: _scrollController,
           itemCount: _listPost.length,
           itemBuilder: buildPostView),
@@ -103,12 +113,21 @@ class _MyHomePageState extends State<MyHomePage> {
                             image: new NetworkImage(_listPost[index].avatar)))),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(left: 15.0),
-                    child: Text(
-                      _listPost[index].name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                      padding: EdgeInsets.only(left: 15.0),
+                      child: Wrap(
+                        children: <Widget>[
+                          InkWell(
+                            onTap: () {
+                              _launchUrl("https://www.instagram.com/" +
+                                  _listPost[index].name);
+                            },
+                            child: Text(
+                              _listPost[index].name,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        ],
+                      )),
                 ),
                 InkWell(
                   onTap: () {
@@ -214,5 +233,13 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
     Navigator.of(context).pop();
+  }
+
+  void _launchUrl(String uri) async {
+    if (await canLaunch(uri)) {
+      await launch(uri);
+    } else {
+      Fluttertoast.showToast(msg: "Could not launch $uri");
+    }
   }
 }
