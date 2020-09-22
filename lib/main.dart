@@ -47,11 +47,15 @@ class _MyHomePageState extends State<MyHomePage>
     with AutomaticKeepAliveClientMixin<MyHomePage> {
   int _counter = 0;
 
+  int _num = 5;
+
   bool _isBusy = true;
 
   List<Post> _listPost = new List();
 
   ScrollController _scrollController = new ScrollController();
+
+  Future _future;
 
   @override
   bool get wantKeepAlive => true;
@@ -63,12 +67,12 @@ class _MyHomePageState extends State<MyHomePage>
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         if (_isBusy == false) {
-          _loadNewPosts(5);
+          _loadNewPosts(_num);
         }
       }
     });
-    Database().init().whenComplete(() {
-      _loadNewPosts(5);
+    _future = Database().init().whenComplete(() {
+      _loadNewPosts(_num);
     });
   }
 
@@ -86,16 +90,29 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: ListView.builder(
-          cacheExtent: 1000.0,
-          addAutomaticKeepAlives: true,
-          controller: _scrollController,
-          itemCount: _listPost.length,
-          itemBuilder: buildPostView),
+      body: FutureBuilder(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
+            return ListView.builder(
+              addAutomaticKeepAlives: true,
+              cacheExtent: 1000.0,
+              controller: _scrollController,
+              itemCount: _listPost.length,
+              itemBuilder: _buildPostView,
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
     );
   }
 
-  Widget buildPostView(BuildContext context, int index) {
+  Widget _buildPostView(BuildContext context, int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
