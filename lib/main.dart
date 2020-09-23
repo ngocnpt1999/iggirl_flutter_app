@@ -87,20 +87,35 @@ class _MyHomePageState extends State<MyHomePage>
     super.build(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
-            return ListView.builder(
-              addAutomaticKeepAlives: true,
-              cacheExtent: 1000.0,
+            return CustomScrollView(
               controller: _scrollController,
-              itemCount: _listPost.length,
-              itemBuilder: _buildPostView,
+              cacheExtent: 1000.0,
+              slivers: <Widget>[
+                SliverAppBar(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image(
+                        height: 32.0,
+                        image: AssetImage("assets/images/logo.png"),
+                        fit: BoxFit.contain,
+                      ),
+                    ],
+                  ),
+                  floating: true,
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    _buildPostView,
+                    childCount: _listPost.length,
+                  ),
+                ),
+              ],
             );
           } else {
             return Center(
