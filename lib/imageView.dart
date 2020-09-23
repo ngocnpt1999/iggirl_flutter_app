@@ -41,7 +41,10 @@ class ImageViewPageState extends State<ImageViewPage> {
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     PopupMenuItem(
-                      child: Text("Tải xuống"),
+                      child: Text(
+                        "Tải xuống",
+                        textAlign: TextAlign.start,
+                      ),
                       value: "save",
                     )
                   ])
