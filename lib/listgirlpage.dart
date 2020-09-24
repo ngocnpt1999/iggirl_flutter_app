@@ -1,18 +1,12 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:iggirl_flutter_app/control/imageAliveView.dart';
 import 'package:iggirl_flutter_app/imageView.dart';
 import 'package:iggirl_flutter_app/model/database.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:dio/dio.dart';
-import 'package:random_string/random_string.dart';
+import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ListGirlPage extends StatefulWidget {
   ListGirlPage();
@@ -132,8 +126,9 @@ class ListGirlPageState extends State<ListGirlPage>
                         children: <Widget>[
                           InkWell(
                             onTap: () {
-                              _launchUrl("https://www.instagram.com/" +
-                                  _listPost[index].name);
+                              Services().launchUrl(
+                                  "https://www.instagram.com/" +
+                                      _listPost[index].name);
                             },
                             child: Text(
                               _listPost[index].name,
@@ -152,7 +147,8 @@ class ListGirlPageState extends State<ListGirlPage>
                                 CupertinoActionSheetAction(
                                   child: Text("Lưu hình ảnh"),
                                   onPressed: () {
-                                    _saveImage(_listPost[index].img);
+                                    Services().saveImage(_listPost[index].img);
+                                    Navigator.of(context).pop();
                                   },
                                 ),
                                 CupertinoActionSheetAction(
@@ -214,39 +210,5 @@ class ListGirlPageState extends State<ListGirlPage>
     _counter += number;
     print("Counter: $_counter");
     _isBusy = false;
-  }
-
-  void _saveImage(String uri) async {
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
-      await Permission.storage.request();
-    } else {
-      var response = await Dio()
-          .get(uri, options: Options(responseType: ResponseType.bytes));
-      var result;
-      ImageGallerySaver.saveImage(Uint8List.fromList(response.data),
-              quality: 100, name: randomString(15))
-          .then((value) => result = value)
-          .whenComplete(() {
-        if (["", null, false, 0].contains(result)) {
-          Fluttertoast.showToast(
-            msg: "Lưu thất bại",
-          );
-        } else {
-          Fluttertoast.showToast(
-            msg: "Lưu thành công",
-          );
-        }
-      });
-    }
-    Navigator.of(context).pop();
-  }
-
-  void _launchUrl(String uri) async {
-    if (await canLaunch(uri)) {
-      await launch(uri);
-    } else {
-      Fluttertoast.showToast(msg: "Could not launch $uri");
-    }
   }
 }

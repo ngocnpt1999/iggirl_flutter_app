@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iggirl_flutter_app/listgirlpage.dart';
+import 'package:iggirl_flutter_app/swipecardspage.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedWidget = 0;
   List<Widget> _widgets = <Widget>[
     ListGirlPage(),
-    Center(),
+    SwipeCardsPage(),
   ];
 
   @override
