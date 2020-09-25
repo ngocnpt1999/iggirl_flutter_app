@@ -37,16 +37,16 @@ class ListGirlPageState extends State<ListGirlPage>
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
+    _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         if (_isBusy == false) {
-          _loadNewPosts(_num);
+          await _loadNewPosts(_num);
         }
       }
     });
-    _future = Database().init().whenComplete(() {
-      _loadNewPosts(_num);
+    _future = Database().init().whenComplete(() async {
+      await _loadNewPosts(_num);
     });
   }
 
@@ -182,10 +182,11 @@ class ListGirlPageState extends State<ListGirlPage>
     );
   }
 
-  void _loadNewPosts(int number) async {
+  Future<void> _loadNewPosts(int number) async {
     _isBusy = true;
     Client client = new Client();
     List<Link> news = Database().links.skip(_counter).take(number).toList();
+    List<Post> newPosts = new List();
 
     for (int i = 0; i < news.length; i++) {
       try {
@@ -193,20 +194,19 @@ class ListGirlPageState extends State<ListGirlPage>
             .get("https://api.instagram.com/oembed/?url=" + news[i].uri);
         if (response.statusCode == 200) {
           var value = json.decode(response.body);
-          Future.delayed(const Duration(milliseconds: 500), () {
-            setState(() {
-              _listPost.add(new Post(
-                  value["author_name"].toString(),
-                  "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-                  news[i].uri + "/media/?size=l"));
-            });
-          });
+          newPosts.add(new Post(
+              value["author_name"].toString(),
+              "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+              news[i].uri + "/media/?size=l"));
         }
       } catch (ex) {
         print(ex);
         continue;
       }
     }
+    setState(() {
+      _listPost.addAll(newPosts);
+    });
     _counter += number;
     print("Counter: $_counter");
     _isBusy = false;

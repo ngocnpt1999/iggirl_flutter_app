@@ -32,8 +32,8 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
   @override
   void initState() {
     super.initState();
-    _future = Database().init().whenComplete(() {
-      _loadNewPosts(_num);
+    _future = Database().init().whenComplete(() async {
+      await _loadNewPosts(_num);
     });
   }
 
@@ -79,14 +79,14 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
                   cardBuilder: _buildPostView,
                   cardController: _controller,
                   swipeCompleteCallback:
-                      (CardSwipeOrientation orientation, int index) {
+                      (CardSwipeOrientation orientation, int index) async {
                     if (orientation != CardSwipeOrientation.RECOVER) {
                       setState(() {
                         _listPost.removeAt(index);
                       });
                     }
                     if (_listPost.length == 2) {
-                      _loadNewPosts(_num);
+                      await _loadNewPosts(_num);
                     }
                   },
                 ),
@@ -178,9 +178,10 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
     );
   }
 
-  void _loadNewPosts(int number) async {
+  Future<void> _loadNewPosts(int number) async {
     Client client = new Client();
     List<Link> news = Database().links.skip(_counter).take(number).toList();
+    List<Post> newPosts = new List();
 
     for (int i = 0; i < news.length; i++) {
       try {
@@ -188,20 +189,19 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
             .get("https://api.instagram.com/oembed/?url=" + news[i].uri);
         if (response.statusCode == 200) {
           var value = json.decode(response.body);
-          Future.delayed(const Duration(milliseconds: 500), () {
-            setState(() {
-              _listPost.add(new Post(
-                  value["author_name"].toString(),
-                  "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-                  news[i].uri + "/media/?size=l"));
-            });
-          });
+          newPosts.add(new Post(
+              value["author_name"].toString(),
+              "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+              news[i].uri + "/media/?size=l"));
         }
       } catch (ex) {
         print(ex);
         continue;
       }
     }
+    setState(() {
+      _listPost.addAll(newPosts);
+    });
     _counter += number;
     print("Counter: $_counter");
   }
