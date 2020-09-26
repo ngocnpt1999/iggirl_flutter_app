@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1087302312351",
+    "firebase_url": "https://fir-946df.firebaseio.com",
+    "project_id": "fir-946df",
+    "storage_bucket": "fir-946df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1087302312351:android:b1604055ac7f3df0731daa",
+        "android_client_info": {
+          "package_name": "com.treecho.iggirl_flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1087302312351-gsar3d76443r5vdlt6k09v1dtlk1phv6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8WkJ_aGDVTudcPWRHjeGqzKsLsHEocX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1087302312351-gsar3d76443r5vdlt6k09v1dtlk1phv6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

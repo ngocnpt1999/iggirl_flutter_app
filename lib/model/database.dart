@@ -1,14 +1,7 @@
 import 'dart:math';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
-
-class Link {
-  String uri;
-
-  Link.fromJson(Map value) {
-    this.uri = "https://www.instagram.com/p/" + value["link"].toString();
-  }
-}
 
 class Post {
   final String name;
@@ -25,15 +18,41 @@ class Database {
 
   Database._internal();
 
-  List<Link> links;
+  List<String> _links;
 
-  Future<List<Link>> init() async {
-    Client client = new Client();
-    links = await _fetchLinks(client);
-    return links;
+  Future<List<String>> init() async {
+    _links = await _fetchData();
+    return _links;
   }
 
-  List<Link> _shuffleLinks(List<Link> items) {
+  Future<List<Post>> getNewPosts(int number) async {
+    List<String> links = new List();
+    for (int i = 0; i < number; i++) {
+      links.add(_links[0]);
+      _links.removeAt(0);
+    }
+    Client client = new Client();
+    List<Post> newPosts = new List();
+    for (int i = 0; i < links.length; i++) {
+      try {
+        var response = await client
+            .get("https://api.instagram.com/oembed/?url=" + links[i]);
+        if (response.statusCode == 200) {
+          var value = json.decode(response.body);
+          newPosts.add(new Post(
+              value["author_name"].toString(),
+              "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+              links[i] + "/media/?size=l"));
+        }
+      } catch (ex) {
+        print(ex);
+        continue;
+      }
+    }
+    return newPosts;
+  }
+
+  List<String> _shuffleData(List<String> items) {
     var random = new Random();
     // Go through all elements.
     for (var i = items.length - 1; i > 0; i--) {
@@ -46,14 +65,17 @@ class Database {
     return items;
   }
 
-  List<Link> _parseLinks(String responseBody) {
-    final parsed = json.decode(responseBody).cast<Map>();
-    return parsed.map<Link>((json) => Link.fromJson(json)).toList();
-  }
-
-  Future<List<Link>> _fetchLinks(Client client) async {
-    final response = await client
-        .get('https://fir-946df.firebaseio.com/shortlinks/links.json');
-    return _shuffleLinks(_parseLinks(response.body));
+  Future<List<String>> _fetchData() async {
+    final db = await FirebaseDatabase.instance
+        .reference()
+        .child("shortlinks/links")
+        .once();
+    List<dynamic> values = db.value;
+    List<String> newLinks = new List();
+    values.forEach((element) {
+      Map map = Map.from(element);
+      newLinks.add("https://www.instagram.com/p/" + map["link"].toString());
+    });
+    return _shuffleData(newLinks);
   }
 }

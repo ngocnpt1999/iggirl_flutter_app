@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
-import 'package:http/http.dart';
 import 'package:iggirl_flutter_app/imageView.dart';
 import 'package:iggirl_flutter_app/model/database.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
@@ -115,7 +113,7 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
               },
               child: CachedNetworkImage(
                 imageUrl: _listPost[index].img,
-                fit: BoxFit.contain,
+                fit: BoxFit.fitWidth,
               ),
             ),
           ),
@@ -179,26 +177,7 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
   }
 
   Future<void> _loadNewPosts(int number) async {
-    Client client = new Client();
-    List<Link> news = Database().links.skip(_counter).take(number).toList();
-    List<Post> newPosts = new List();
-
-    for (int i = 0; i < news.length; i++) {
-      try {
-        var response = await client
-            .get("https://api.instagram.com/oembed/?url=" + news[i].uri);
-        if (response.statusCode == 200) {
-          var value = json.decode(response.body);
-          newPosts.add(new Post(
-              value["author_name"].toString(),
-              "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-              news[i].uri + "/media/?size=l"));
-        }
-      } catch (ex) {
-        print(ex);
-        continue;
-      }
-    }
+    List<Post> newPosts = await Database().getNewPosts(number);
     setState(() {
       _listPost.addAll(newPosts);
     });
