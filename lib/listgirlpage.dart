@@ -35,16 +35,16 @@ class ListGirlPageState extends State<ListGirlPage>
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() async {
+    _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         if (_isBusy == false) {
-          await _loadNewPosts(_num);
+          _loadNewPosts(_num);
         }
       }
     });
-    _future = Database().init().whenComplete(() async {
-      await _loadNewPosts(_num);
+    _future = Database().fetchData(_counter, _num).whenComplete(() {
+      _loadNewPosts(_num);
     });
   }
 
@@ -180,14 +180,16 @@ class ListGirlPageState extends State<ListGirlPage>
     );
   }
 
-  Future<void> _loadNewPosts(int number) async {
+  void _loadNewPosts(int number) {
     _isBusy = true;
-    List<Post> newPosts = await Database().getNewPosts(number);
-    setState(() {
-      _listPost.addAll(newPosts);
+    Database().fetchData(_counter, _num).whenComplete(() async {
+      List<Post> newPosts = await Database().getNewPosts();
+      setState(() {
+        _listPost.addAll(newPosts);
+      });
+      _counter += number;
+      print("Counter: $_counter");
+      _isBusy = false;
     });
-    _counter += number;
-    print("Counter: $_counter");
-    _isBusy = false;
   }
 }

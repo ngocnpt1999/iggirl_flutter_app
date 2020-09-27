@@ -20,35 +20,26 @@ class Database {
 
   List<String> _links;
 
-  Future<List<String>> init() async {
-    _links = await _fetchData();
-    return _links;
-  }
-
-  Future<List<Post>> getNewPosts(int number) async {
-    List<String> links = new List();
-    for (int i = 0; i < number; i++) {
-      links.add(_links[0]);
-      _links.removeAt(0);
-    }
+  Future<List<Post>> getNewPosts() async {
     Client client = new Client();
     List<Post> newPosts = new List();
-    for (int i = 0; i < links.length; i++) {
+    for (int i = 0; i < _links.length; i++) {
       try {
         var response = await client
-            .get("https://api.instagram.com/oembed/?url=" + links[i]);
+            .get("https://api.instagram.com/oembed/?url=" + _links[i]);
         if (response.statusCode == 200) {
           var value = json.decode(response.body);
           newPosts.add(new Post(
               value["author_name"].toString(),
               "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-              links[i] + "/media/?size=l"));
+              _links[i] + "/media/?size=l"));
         }
       } catch (ex) {
         print(ex);
         continue;
       }
     }
+    _links.clear();
     return newPosts;
   }
 
@@ -65,17 +56,38 @@ class Database {
     return items;
   }
 
-  Future<List<String>> _fetchData() async {
+  Future<List<String>> fetchData(int start, int count) async {
+    if (_links != null && _links.length > 0) {
+      return _links;
+    }
     final db = await FirebaseDatabase.instance
         .reference()
         .child("shortlinks/links")
+        .orderByKey()
+        .startAt(start.toString())
+        .limitToFirst(count)
         .once();
-    List<dynamic> values = db.value;
-    List<String> newLinks = new List();
-    values.forEach((element) {
-      Map map = Map.from(element);
-      newLinks.add("https://www.instagram.com/p/" + map["link"].toString());
-    });
-    return _shuffleData(newLinks);
+    print(db.value);
+    if (db.value is Map) {
+      Map values = db.value;
+      List<String> newLinks = new List();
+      values.forEach((key, value) {
+        if (value != null) {
+          newLinks
+              .add("https://www.instagram.com/p/" + value["link"].toString());
+        }
+      });
+      return _links = _shuffleData(newLinks);
+    } else {
+      List<dynamic> values = db.value;
+      List<String> newLinks = new List();
+      values.forEach((element) {
+        if (element != null) {
+          Map map = Map.from(element);
+          newLinks.add("https://www.instagram.com/p/" + map["link"].toString());
+        }
+      });
+      return _links = _shuffleData(newLinks);
+    }
   }
 }

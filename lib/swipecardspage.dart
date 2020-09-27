@@ -30,8 +30,8 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
   @override
   void initState() {
     super.initState();
-    _future = Database().init().whenComplete(() async {
-      await _loadNewPosts(_num);
+    _future = Database().fetchData(_counter, _num).whenComplete(() {
+      _loadNewPosts(_num);
     });
   }
 
@@ -77,14 +77,14 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
                   cardBuilder: _buildPostView,
                   cardController: _controller,
                   swipeCompleteCallback:
-                      (CardSwipeOrientation orientation, int index) async {
+                      (CardSwipeOrientation orientation, int index) {
                     if (orientation != CardSwipeOrientation.RECOVER) {
                       setState(() {
                         _listPost.removeAt(index);
                       });
                     }
                     if (_listPost.length == 2) {
-                      await _loadNewPosts(_num);
+                      _loadNewPosts(_num);
                     }
                   },
                 ),
@@ -176,12 +176,14 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
     );
   }
 
-  Future<void> _loadNewPosts(int number) async {
-    List<Post> newPosts = await Database().getNewPosts(number);
-    setState(() {
-      _listPost.addAll(newPosts);
+  void _loadNewPosts(int number) {
+    Database().fetchData(_counter, _num).whenComplete(() async {
+      List<Post> newPosts = await Database().getNewPosts();
+      setState(() {
+        _listPost.addAll(newPosts);
+      });
+      _counter += number;
+      print("Counter: $_counter");
     });
-    _counter += number;
-    print("Counter: $_counter");
   }
 }
