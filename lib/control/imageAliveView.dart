@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ImageAliveView extends StatefulWidget {
@@ -29,13 +28,12 @@ class ImageAliveViewState extends State<ImageAliveView>
     super.build(context);
 
     return Container(
-        child: CachedNetworkImage(
-      imageUrl: this._image,
-      placeholder: (context, url) => Image(
-        image: AssetImage("assets/images/white.png"),
+      width: MediaQuery.of(context).size.width,
+      child: FadeInImage.assetNetwork(
+        image: _image,
+        placeholder: "assets/images/white.png",
         fit: BoxFit.fitWidth,
       ),
-      fit: BoxFit.fitWidth,
-    ));
+    );
   }
 }

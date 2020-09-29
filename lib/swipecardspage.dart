@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -111,8 +110,9 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => ImageViewPage(_listPost[index].img)));
               },
-              child: CachedNetworkImage(
-                imageUrl: _listPost[index].img,
+              child: FadeInImage.assetNetwork(
+                image: _listPost[index].img,
+                placeholder: "assets/images/white.png",
                 fit: BoxFit.fitWidth,
               ),
             ),

@@ -18,8 +18,9 @@ class Services {
     if (!status.isGranted) {
       await Permission.storage.request();
     } else {
+      String hdUri = uri.replaceFirst(RegExp("size=m"), "size=l", 10);
       var response = await Dio()
-          .get(uri, options: Options(responseType: ResponseType.bytes));
+          .get(hdUri, options: Options(responseType: ResponseType.bytes));
       var result;
       ImageGallerySaver.saveImage(Uint8List.fromList(response.data),
               quality: 100, name: randomString(15))

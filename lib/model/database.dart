@@ -32,7 +32,7 @@ class Database {
           newPosts.add(new Post(
               value["author_name"].toString(),
               "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-              _links[i] + "/media/?size=l"));
+              _links[i] + "/media/?size=m"));
         }
       } catch (ex) {
         print(ex);

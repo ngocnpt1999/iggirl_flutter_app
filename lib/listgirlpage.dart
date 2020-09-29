@@ -19,7 +19,7 @@ class ListGirlPageState extends State<ListGirlPage>
 
   int _counter = 0;
 
-  int _num = 5;
+  int _num = 8;
 
   bool _isBusy = true;
 
@@ -66,7 +66,6 @@ class ListGirlPageState extends State<ListGirlPage>
               snapshot.hasData) {
             return CustomScrollView(
               controller: _scrollController,
-              cacheExtent: 1000.0,
               slivers: <Widget>[
                 SliverAppBar(
                   title: Row(
@@ -85,6 +84,18 @@ class ListGirlPageState extends State<ListGirlPage>
                   delegate: SliverChildBuilderDelegate(
                     _buildPostView,
                     childCount: _listPost.length,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.all(5.0),
+                      height: 40.0,
+                      width: 40.0,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -187,9 +198,9 @@ class ListGirlPageState extends State<ListGirlPage>
       setState(() {
         _listPost.addAll(newPosts);
       });
+      _isBusy = false;
       _counter += number;
       print("Counter: $_counter");
-      _isBusy = false;
     });
   }
 }
