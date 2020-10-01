@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iggirl_flutter_app/listgirlpage.dart';
+import 'package:iggirl_flutter_app/pageviewpage.dart';
 import 'package:iggirl_flutter_app/swipecardspage.dart';
 
 void main() {
@@ -36,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedWidget = 0;
   List<Widget> _widgets = <Widget>[
+    PageViewPage(),
     ListGirlPage(),
     SwipeCardsPage(),
   ];
@@ -56,6 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: _widgets[_selectedWidget],
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.filter),
+            title: Text("PageView"),
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.view_list),
             title: Text("List"),

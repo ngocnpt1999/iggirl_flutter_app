@@ -101,6 +101,7 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
 
   Widget _buildPostView(BuildContext context, int index) {
     return Card(
+      elevation: 5.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[

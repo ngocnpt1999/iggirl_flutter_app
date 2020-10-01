@@ -48,7 +48,7 @@ class ImageViewPageState extends State<ImageViewPage> {
         child: Container(
           width: MediaQuery.of(context).size.width,
           child: FadeInImage.assetNetwork(
-            image: _img,
+            image: _img.replaceFirst(RegExp("size=m"), "size=l", 10),
             placeholder: "assets/images/white.png",
             fit: BoxFit.fitWidth,
           ),
