@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 
-class ImageViewPage extends StatefulWidget {
+class ImageViewPage extends StatelessWidget {
   final String _img;
 
   ImageViewPage(this._img);
-
-  @override
-  ImageViewPageState createState() => ImageViewPageState(this._img);
-}
-
-class ImageViewPageState extends State<ImageViewPage> {
-  final String _img;
-
-  ImageViewPageState(this._img);
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

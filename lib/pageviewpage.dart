@@ -1,46 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iggirl_flutter_app/controller/controller.dart';
 import 'package:iggirl_flutter_app/imageView.dart';
-import 'package:iggirl_flutter_app/model/database.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
 
-class PageViewPage extends StatefulWidget {
-  @override
-  PageViewPageState createState() => PageViewPageState();
-}
+class PageViewPage extends StatelessWidget {
+  PageViewPage();
 
-class PageViewPageState extends State<PageViewPage> {
-  PageViewPageState();
+  final int _num = 5;
 
-  int _counter = 0;
+  final ListPostController _pageController = ListPostController();
 
-  int _num = 5;
-
-  bool _isBusy = true;
-
-  List<Post> _listPost = new List();
-
-  PageController _pageController = new PageController();
-
-  Future _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = Database().fetchData(_counter, _num).whenComplete(() {
-      _loadNewPosts(_num);
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  final PageController _controller = PageController();
 
   @override
   Widget build(BuildContext context) {
+    _pageController.loadNewPosts(_num);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -54,28 +32,24 @@ class PageViewPageState extends State<PageViewPage> {
           ],
         ),
       ),
-      body: FutureBuilder(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            return PageView.builder(
-              controller: _pageController,
-              itemBuilder: _buildPostView,
-              itemCount: _listPost.length,
-              onPageChanged: (value) {
-                if (value == _listPost.length - 2 && _isBusy == false) {
-                  _loadNewPosts(_num);
-                }
-              },
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+      body: Obx(() {
+        if (_pageController.listPost.length > 0) {
+          return PageView.builder(
+            controller: _controller,
+            itemBuilder: _buildPostView,
+            itemCount: _pageController.listPost.length,
+            onPageChanged: (value) {
+              if (value == _pageController.listPost.length - 2) {
+                _pageController.loadNewPosts(_num);
+              }
+            },
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      }),
     );
   }
 
@@ -91,19 +65,19 @@ class PageViewPageState extends State<PageViewPage> {
             children: <Widget>[
               Padding(
                   padding: EdgeInsets.only(
-                      left: 10.0, top: 15.0, bottom: 7.0, right: 10.0),
+                      left: 12.0, top: 8.0, bottom: 8.0, right: 10.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                          width: 35.0,
-                          height: 35.0,
+                          width: 30.0,
+                          height: 30.0,
                           decoration: new BoxDecoration(
                               shape: BoxShape.circle,
                               image: new DecorationImage(
                                   fit: BoxFit.fill,
-                                  image: new NetworkImage(
-                                      _listPost[index].avatar)))),
+                                  image: new NetworkImage(_pageController
+                                      .listPost[index].avatar)))),
                       Expanded(
                         child: Padding(
                             padding: EdgeInsets.only(left: 15.0),
@@ -113,10 +87,11 @@ class PageViewPageState extends State<PageViewPage> {
                                   onTap: () {
                                     Services().launchUrl(
                                         "https://www.instagram.com/" +
-                                            _listPost[index].name);
+                                            _pageController
+                                                .listPost[index].name);
                                   },
                                   child: Text(
-                                    _listPost[index].name,
+                                    _pageController.listPost[index].name,
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -133,15 +108,16 @@ class PageViewPageState extends State<PageViewPage> {
                                       CupertinoActionSheetAction(
                                         child: Text("Lưu hình ảnh"),
                                         onPressed: () {
-                                          Services()
-                                              .saveImage(_listPost[index].img);
+                                          Services().saveImage(_pageController
+                                              .listPost[index].img);
                                           Navigator.of(context).pop();
                                         },
                                       ),
                                       CupertinoActionSheetAction(
                                         child: Text("Chia sẻ liên kết"),
                                         onPressed: () {
-                                          Share.share(_listPost[index].img);
+                                          Share.share(_pageController
+                                              .listPost[index].img);
                                           Navigator.of(context).pop();
                                         },
                                       ),
@@ -162,10 +138,10 @@ class PageViewPageState extends State<PageViewPage> {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) =>
-                          ImageViewPage(_listPost[index].img)));
+                          ImageViewPage(_pageController.listPost[index].img)));
                 },
                 child: FadeInImage.assetNetwork(
-                  image: _listPost[index].img,
+                  image: _pageController.listPost[index].img,
                   placeholder: "assets/images/white.png",
                   fit: BoxFit.fitWidth,
                 ),
@@ -175,18 +151,5 @@ class PageViewPageState extends State<PageViewPage> {
         ),
       ),
     );
-  }
-
-  void _loadNewPosts(int number) {
-    _isBusy = true;
-    Database().fetchData(_counter, _num).whenComplete(() async {
-      List<Post> newPosts = await Database().getNewPosts();
-      setState(() {
-        _listPost.addAll(newPosts);
-      });
-      _isBusy = false;
-      _counter += number;
-      print("Counter: $_counter");
-    });
   }
 }

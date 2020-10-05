@@ -1,46 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
+import 'package:get/get.dart';
+import 'package:iggirl_flutter_app/controller/controller.dart';
 import 'package:iggirl_flutter_app/imageView.dart';
-import 'package:iggirl_flutter_app/model/database.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
 
-class SwipeCardsPage extends StatefulWidget {
+class SwipeCardsPage extends StatelessWidget {
   SwipeCardsPage();
 
-  @override
-  SwipeCardsPageState createState() => SwipeCardsPageState();
-}
+  final int _num = 5;
 
-class SwipeCardsPageState extends State<SwipeCardsPage> {
-  SwipeCardsPageState();
+  final ListPostController _pageController = ListPostController();
 
-  int _counter = 0;
-
-  int _num = 5;
-
-  CardController _controller = new CardController();
-
-  List<Post> _listPost = new List();
-
-  Future _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = Database().fetchData(_counter, _num).whenComplete(() {
-      _loadNewPosts(_num);
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  final CardController _controller = CardController();
 
   @override
   Widget build(BuildContext context) {
+    _pageController.loadNewPosts(_num);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -54,48 +33,42 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
           ],
         ),
       ),
-      body: FutureBuilder(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            return Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.6,
-                child: TinderSwapCard(
-                  swipeUp: true,
-                  swipeDown: true,
-                  orientation: AmassOrientation.BOTTOM,
-                  totalNum: _listPost.length,
-                  stackNum: 5,
-                  swipeEdge: 6.0,
-                  maxWidth: MediaQuery.of(context).size.width * 0.9,
-                  maxHeight: MediaQuery.of(context).size.width * 0.9,
-                  minWidth: MediaQuery.of(context).size.width * 0.8,
-                  minHeight: MediaQuery.of(context).size.width * 0.8,
-                  cardBuilder: _buildPostView,
-                  cardController: _controller,
-                  swipeCompleteCallback:
-                      (CardSwipeOrientation orientation, int index) {
-                    if (orientation != CardSwipeOrientation.RECOVER) {
-                      setState(() {
-                        _listPost.removeAt(index);
-                      });
-                    }
-                    if (_listPost.length == 2) {
-                      _loadNewPosts(_num);
-                    }
-                  },
-                ),
+      body: Obx(() {
+        if (_pageController.listPost.length > 0) {
+          return Center(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: TinderSwapCard(
+                swipeUp: true,
+                swipeDown: true,
+                orientation: AmassOrientation.BOTTOM,
+                totalNum: _pageController.listPost.length,
+                stackNum: 5,
+                swipeEdge: 6.0,
+                maxWidth: MediaQuery.of(context).size.width * 0.9,
+                maxHeight: MediaQuery.of(context).size.width * 0.9,
+                minWidth: MediaQuery.of(context).size.width * 0.8,
+                minHeight: MediaQuery.of(context).size.width * 0.8,
+                cardBuilder: _buildPostView,
+                cardController: _controller,
+                swipeCompleteCallback:
+                    (CardSwipeOrientation orientation, int index) {
+                  if (orientation != CardSwipeOrientation.RECOVER) {
+                    _pageController.listPost.removeAt(index);
+                  }
+                  if (_pageController.listPost.length == 2) {
+                    _pageController.loadNewPosts(_num);
+                  }
+                },
               ),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      }),
     );
   }
 
@@ -109,10 +82,11 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ImageViewPage(_listPost[index].img)));
+                    builder: (context) =>
+                        ImageViewPage(_pageController.listPost[index].img)));
               },
               child: FadeInImage.assetNetwork(
-                image: _listPost[index].img,
+                image: _pageController.listPost[index].img,
                 placeholder: "assets/images/white.png",
                 fit: BoxFit.fitWidth,
               ),
@@ -129,10 +103,10 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
                       InkWell(
                         onTap: () {
                           Services().launchUrl("https://www.instagram.com/" +
-                              _listPost[index].name);
+                              _pageController.listPost[index].name);
                         },
                         child: Text(
-                          _listPost[index].name,
+                          _pageController.listPost[index].name,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       )
@@ -147,15 +121,16 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
                                   CupertinoActionSheetAction(
                                     child: Text("Lưu hình ảnh"),
                                     onPressed: () {
-                                      Services()
-                                          .saveImage(_listPost[index].img);
+                                      Services().saveImage(
+                                          _pageController.listPost[index].img);
                                       Navigator.of(context).pop();
                                     },
                                   ),
                                   CupertinoActionSheetAction(
                                     child: Text("Chia sẻ liên kết"),
                                     onPressed: () {
-                                      Share.share(_listPost[index].img);
+                                      Share.share(
+                                          _pageController.listPost[index].img);
                                       Navigator.of(context).pop();
                                     },
                                   ),
@@ -175,16 +150,5 @@ class SwipeCardsPageState extends State<SwipeCardsPage> {
         ],
       ),
     );
-  }
-
-  void _loadNewPosts(int number) {
-    Database().fetchData(_counter, _num).whenComplete(() async {
-      List<Post> newPosts = await Database().getNewPosts();
-      setState(() {
-        _listPost.addAll(newPosts);
-      });
-      _counter += number;
-      print("Counter: $_counter");
-    });
   }
 }

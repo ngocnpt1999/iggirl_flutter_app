@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:iggirl_flutter_app/listgirlpage.dart';
-import 'package:iggirl_flutter_app/pageviewpage.dart';
-import 'package:iggirl_flutter_app/swipecardspage.dart';
+import 'package:get/get.dart';
+import 'package:iggirl_flutter_app/controller/controller.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +11,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -25,59 +24,37 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _selectedWidget = 0;
-  List<Widget> _widgets = <Widget>[
-    PageViewPage(),
-    ListGirlPage(),
-    SwipeCardsPage(),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  final NavigationTabController _pageController = NavigationTabController();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _widgets[_selectedWidget],
-      bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.filter),
-            title: Text("PageView"),
+    return Obx(() => Scaffold(
+          body: _pageController.widgets[_pageController.selectedWidget.value],
+          bottomNavigationBar: BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.filter),
+                title: Text("PageView"),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.view_list),
+                title: Text("List"),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.layers),
+                title: Text("Swipe"),
+              ),
+            ],
+            currentIndex: _pageController.selectedWidget.value,
+            onTap: (value) {
+              _pageController.changeTab(value);
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.view_list),
-            title: Text("List"),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.layers),
-            title: Text("Swipe"),
-          ),
-        ],
-        currentIndex: _selectedWidget,
-        onTap: (value) {
-          setState(() {
-            _selectedWidget = value;
-          });
-        },
-      ),
-    );
+        ));
   }
 }
