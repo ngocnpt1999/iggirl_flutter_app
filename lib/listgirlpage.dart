@@ -24,12 +24,14 @@ class ListGirlPage extends StatelessWidget {
         _pageController.loadNewPosts(_num);
       }
     });
-    _pageController.loadNewPosts(_num);
+    if (_pageController.listPost.length == 0) {
+      _pageController.loadNewPosts(_num);
+    }
 
-    return Obx(() {
-      if (_pageController.listPost.length > 0) {
-        return Scaffold(
-          body: CustomScrollView(
+    return Scaffold(
+      body: Obx(() {
+        if (_pageController.listPost.length > 0) {
+          return CustomScrollView(
             controller: _scrollController,
             slivers: <Widget>[
               SliverAppBar(
@@ -64,16 +66,14 @@ class ListGirlPage extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        );
-      } else {
-        return Scaffold(
-          body: Center(
+          );
+        } else {
+          return Center(
             child: CircularProgressIndicator(),
-          ),
-        );
-      }
-    });
+          );
+        }
+      }),
+    );
   }
 
   Widget _buildPostView(BuildContext context, int index) {

@@ -18,7 +18,7 @@ class Database {
 
   Database._internal();
 
-  List<String> _links;
+  List<String> _links = List();
 
   Future<List<Post>> getNewPosts() async {
     Client client = new Client();
@@ -57,9 +57,10 @@ class Database {
   }
 
   Future<List<String>> fetchData(int start, int count) async {
-    if (_links != null && _links.length > 0) {
+    if (_links.length > 0) {
       return _links;
     }
+
     final db = await FirebaseDatabase.instance
         .reference()
         .child("shortlinks/links")

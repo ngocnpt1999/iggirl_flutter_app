@@ -31,9 +31,10 @@ class ListPostController extends GetxController {
   var listPost = List<Post>().obs;
 
   void loadNewPosts(int number) {
-    if (_isBusy) {
+    if (_isBusy == true) {
       return;
     }
+
     _isBusy = true;
     Database().fetchData(_counter, number).whenComplete(() async {
       List<Post> newPosts = await Database().getNewPosts();

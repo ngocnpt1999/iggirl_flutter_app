@@ -17,7 +17,9 @@ class PageViewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _pageController.loadNewPosts(_num);
+    if (_pageController.listPost.length == 0) {
+      _pageController.loadNewPosts(_num);
+    }
 
     return Scaffold(
       appBar: AppBar(
