@@ -39,15 +39,15 @@ class MyHomePage extends StatelessWidget {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.filter),
-                title: Text("PageView"),
+                label: "PageView",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.view_list),
-                title: Text("List"),
+                label: "List",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.layers),
-                title: Text("Swipe"),
+                label: "Swipe",
               ),
             ],
             currentIndex: _pageController.selectedWidget.value,

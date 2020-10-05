@@ -36,6 +36,7 @@ class PageViewPage extends StatelessWidget {
         if (_pageController.listPost.length > 0) {
           return PageView.builder(
             controller: _controller,
+            scrollDirection: Axis.horizontal,
             itemBuilder: _buildPostView,
             itemCount: _pageController.listPost.length,
             onPageChanged: (value) {

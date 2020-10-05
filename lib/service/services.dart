@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,9 +15,12 @@ class Services {
   Services._internal();
 
   void saveImage(String uri) async {
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
+    var storageStatus = await Permission.storage.status;
+    var photosStatus = await Permission.photos.status;
+    if (!storageStatus.isGranted && Platform.isAndroid) {
       await Permission.storage.request();
+    } else if (!photosStatus.isGranted && Platform.isIOS) {
+      await Permission.photos.request();
     } else {
       String hdUri = uri.replaceFirst(RegExp("size=m"), "size=l", 10);
       var response = await Dio()
