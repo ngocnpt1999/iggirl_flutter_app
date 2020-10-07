@@ -43,11 +43,11 @@ class MyHomePage extends StatelessWidget {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.view_list),
-                label: "List",
+                label: "ListView",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.layers),
-                label: "Swipe",
+                label: "TinderView",
               ),
             ],
             currentIndex: _pageController.selectedWidget.value,
