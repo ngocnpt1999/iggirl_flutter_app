@@ -83,9 +83,7 @@ class SwipeCardsPage extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        ImageViewPage(_pageController.listPost[index].img)));
+                Get.to(ImageViewPage(_pageController.listPost[index].img));
               },
               child: FadeInImage.assetNetwork(
                 image: _pageController.listPost[index].img,

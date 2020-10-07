@@ -62,92 +62,109 @@ class PageViewPage extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.9,
         child: Card(
           elevation: 5.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
             children: <Widget>[
-              Padding(
-                  padding: EdgeInsets.only(
-                      left: 12.0, top: 8.0, bottom: 8.0, right: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                          width: 30.0,
-                          height: 30.0,
-                          decoration: new BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: new DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image: new NetworkImage(_pageController
-                                      .listPost[index].avatar)))),
-                      Expanded(
-                        child: Padding(
-                            padding: EdgeInsets.only(left: 15.0),
-                            child: Wrap(
-                              children: <Widget>[
-                                InkWell(
-                                  onTap: () {
-                                    Services().launchUrl(
-                                        "https://www.instagram.com/" +
-                                            _pageController
-                                                .listPost[index].name);
-                                  },
-                                  child: Text(
-                                    _pageController.listPost[index].name,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              ],
-                            )),
+              Stack(
+                children: <Widget>[
+                  Container(
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(
+                            ImageViewPage(_pageController.listPost[index].img));
+                      },
+                      child: FadeInImage.assetNetwork(
+                        image: _pageController.listPost[index].img,
+                        placeholder: "assets/images/white.png",
+                        fit: BoxFit.fitWidth,
                       ),
-                      InkWell(
-                        onTap: () {
-                          showCupertinoModalPopup(
-                              context: context,
-                              builder: (context) => CupertinoActionSheet(
-                                    actions: <Widget>[
-                                      CupertinoActionSheetAction(
-                                        child: Text("Lưu hình ảnh"),
-                                        onPressed: () {
-                                          Services().saveImage(_pageController
-                                              .listPost[index].img);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      CupertinoActionSheetAction(
-                                        child: Text("Chia sẻ liên kết"),
-                                        onPressed: () {
-                                          Share.share(_pageController
-                                              .listPost[index].img);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                    cancelButton: CupertinoActionSheetAction(
-                                      child: Text("Cancel"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ));
-                        },
-                        child: Icon(Icons.more_vert),
-                      )
-                    ],
-                  )),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          ImageViewPage(_pageController.listPost[index].img)));
-                },
-                child: FadeInImage.assetNetwork(
-                  image: _pageController.listPost[index].img,
-                  placeholder: "assets/images/white.png",
-                  fit: BoxFit.fitWidth,
-                ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Container(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        color: Colors.grey.withOpacity(0.5),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              left: 12.0, top: 8.0, bottom: 8.0, right: 10.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                  width: 30.0,
+                                  height: 30.0,
+                                  decoration: new BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: new DecorationImage(
+                                          fit: BoxFit.fill,
+                                          image: new NetworkImage(
+                                              _pageController
+                                                  .listPost[index].avatar)))),
+                              Expanded(
+                                child: Padding(
+                                    padding: EdgeInsets.only(left: 15.0),
+                                    child: Wrap(
+                                      children: <Widget>[
+                                        InkWell(
+                                          onTap: () {
+                                            Services().launchUrl(
+                                                "https://www.instagram.com/" +
+                                                    _pageController
+                                                        .listPost[index].name);
+                                          },
+                                          child: Text(
+                                            _pageController
+                                                .listPost[index].name,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  showCupertinoModalPopup(
+                                      context: context,
+                                      builder: (context) =>
+                                          CupertinoActionSheet(
+                                            actions: <Widget>[
+                                              CupertinoActionSheetAction(
+                                                child: Text("Lưu hình ảnh"),
+                                                onPressed: () {
+                                                  Services().saveImage(
+                                                      _pageController
+                                                          .listPost[index].img);
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              CupertinoActionSheetAction(
+                                                child: Text("Chia sẻ liên kết"),
+                                                onPressed: () {
+                                                  Share.share(_pageController
+                                                      .listPost[index].img);
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                            cancelButton:
+                                                CupertinoActionSheetAction(
+                                              child: Text("Cancel"),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ));
+                                },
+                                child: Icon(Icons.more_vert),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

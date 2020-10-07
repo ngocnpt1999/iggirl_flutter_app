@@ -151,9 +151,7 @@ class ListGirlPage extends StatelessWidget {
             )),
         InkWell(
           onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) =>
-                    ImageViewPage(_pageController.listPost[index].img)));
+            Get.to(ImageViewPage(_pageController.listPost[index].img));
           },
           child: ImageAliveView(_pageController.listPost[index].img),
         ),
