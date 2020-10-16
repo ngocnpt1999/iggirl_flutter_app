@@ -77,76 +77,81 @@ class SwipeCardsPage extends StatelessWidget {
   Widget _buildPostView(BuildContext context, int index) {
     return Card(
       elevation: 5.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
+        alignment: Alignment.center,
         children: <Widget>[
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                Get.to(ImageViewPage(_pageController.listPost[index].img));
-              },
-              child: FadeInImage.assetNetwork(
-                image: _pageController.listPost[index].img,
-                placeholder: "assets/images/white.png",
-                fit: BoxFit.fitWidth,
+          InkWell(
+            onTap: () {
+              Get.to(ImageViewPage(_pageController.listPost[index].img));
+            },
+            child: FadeInImage.assetNetwork(
+              image: _pageController.listPost[index].img,
+              placeholder: "assets/images/white.png",
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                color: Colors.grey.withOpacity(0.5),
+                padding: EdgeInsets.all(10.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                        child: Wrap(
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () {
+                            Services().launchUrl("https://www.instagram.com/" +
+                                _pageController.listPost[index].name);
+                          },
+                          child: Text(
+                            _pageController.listPost[index].name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      ],
+                    )),
+                    InkWell(
+                      onTap: () {
+                        showCupertinoModalPopup(
+                            context: context,
+                            builder: (context) => CupertinoActionSheet(
+                                  actions: <Widget>[
+                                    CupertinoActionSheetAction(
+                                      child: Text("Lưu hình ảnh"),
+                                      onPressed: () {
+                                        Services().saveImage(_pageController
+                                            .listPost[index].img);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    CupertinoActionSheetAction(
+                                      child: Text("Chia sẻ liên kết"),
+                                      onPressed: () {
+                                        Share.share(_pageController
+                                            .listPost[index].img);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                  cancelButton: CupertinoActionSheetAction(
+                                    child: Text("Cancel"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ));
+                      },
+                      child: Icon(Icons.more_vert),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
-          Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                      child: Wrap(
-                    children: <Widget>[
-                      InkWell(
-                        onTap: () {
-                          Services().launchUrl("https://www.instagram.com/" +
-                              _pageController.listPost[index].name);
-                        },
-                        child: Text(
-                          _pageController.listPost[index].name,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    ],
-                  )),
-                  InkWell(
-                    onTap: () {
-                      showCupertinoModalPopup(
-                          context: context,
-                          builder: (context) => CupertinoActionSheet(
-                                actions: <Widget>[
-                                  CupertinoActionSheetAction(
-                                    child: Text("Lưu hình ảnh"),
-                                    onPressed: () {
-                                      Services().saveImage(
-                                          _pageController.listPost[index].img);
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  CupertinoActionSheetAction(
-                                    child: Text("Chia sẻ liên kết"),
-                                    onPressed: () {
-                                      Share.share(
-                                          _pageController.listPost[index].img);
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                                cancelButton: CupertinoActionSheetAction(
-                                  child: Text("Cancel"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ));
-                    },
-                    child: Icon(Icons.more_vert),
-                  )
-                ],
-              )),
         ],
       ),
     );
