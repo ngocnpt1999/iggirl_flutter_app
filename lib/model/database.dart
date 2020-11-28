@@ -18,21 +18,27 @@ class Database {
 
   Database._internal();
 
+  String _accessToken = "790477488476281|GlEHJnfgNq9hH8BKTg0rW6ZYSEk";
+
   List<String> _links = List();
 
   Future<List<Post>> getNewPosts() async {
-    Client client = new Client();
-    List<Post> newPosts = new List();
+    Client client = Client();
+    List<Post> newPosts = List();
     for (int i = 0; i < _links.length; i++) {
       try {
-        var response = await client
-            .get("https://api.instagram.com/oembed/?url=" + _links[i]);
+        var response = await client.get(
+            "https://graph.facebook.com/v9.0/instagram_oembed?url=" +
+                _links[i] +
+                "&access_token=" +
+                _accessToken);
         if (response.statusCode == 200) {
           var value = json.decode(response.body);
-          newPosts.add(new Post(
-              value["author_name"].toString(),
-              "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-              _links[i] + "/media/?size=m"));
+          newPosts.add(Post(
+            value["author_name"].toString(),
+            "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+            value["thumbnail_url"].toString(),
+          ));
         }
       } catch (ex) {
         print(ex);
@@ -44,7 +50,7 @@ class Database {
   }
 
   List<String> _shuffleData(List<String> items) {
-    var random = new Random();
+    var random = Random();
     // Go through all elements.
     for (var i = items.length - 1; i > 0; i--) {
       // Pick a pseudorandom number according to the list length
@@ -63,15 +69,15 @@ class Database {
 
     final db = await FirebaseDatabase.instance
         .reference()
-        .child("shortlinks/links")
+        .child("links")
         .orderByKey()
         .startAt(start.toString())
         .limitToFirst(count)
         .once();
     print(db.value);
+    List<String> newLinks = List();
     if (db.value is Map) {
       Map values = db.value;
-      List<String> newLinks = new List();
       values.forEach((key, value) {
         if (value != null) {
           newLinks
@@ -81,7 +87,6 @@ class Database {
       return _links = _shuffleData(newLinks);
     } else {
       List<dynamic> values = db.value;
-      List<String> newLinks = new List();
       values.forEach((element) {
         if (element != null) {
           Map map = Map.from(element);
