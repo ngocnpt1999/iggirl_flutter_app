@@ -18,7 +18,7 @@ class Database {
 
   Database._internal();
 
-  String _accessToken = "790477488476281|GlEHJnfgNq9hH8BKTg0rW6ZYSEk";
+  String _accessToken = "";
 
   List<String> _links = List();
 
@@ -63,11 +63,18 @@ class Database {
   }
 
   Future<List<String>> fetchData(int start, int count) async {
+    if (_accessToken.isEmpty) {
+      var db = await FirebaseDatabase.instance
+          .reference()
+          .child("access_token")
+          .once();
+      print(db.value);
+      _accessToken = db.value.toString();
+    }
     if (_links.length > 0) {
       return _links;
     }
-
-    final db = await FirebaseDatabase.instance
+    var db = await FirebaseDatabase.instance
         .reference()
         .child("links")
         .orderByKey()
