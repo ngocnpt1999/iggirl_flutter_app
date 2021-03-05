@@ -1,17 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iggirl_flutter_app/controller/controller.dart';
-import 'package:iggirl_flutter_app/imageView.dart';
+import 'package:iggirl_flutter_app/controller/state_management.dart';
+import 'package:iggirl_flutter_app/image_view.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class PageViewPage extends StatelessWidget {
   PageViewPage();
 
-  final int _num = 5;
+  final int _num = 8;
 
-  final ListPostController _pageController = ListPostController();
+  final ListPostController _pageController = Get.find();
 
   final PageController _controller = PageController();
 
@@ -59,7 +60,7 @@ class PageViewPage extends StatelessWidget {
   Widget _buildPostView(BuildContext context, int index) {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
+        width: Get.width * 0.9,
         child: Card(
           elevation: 5.0,
           child: Wrap(
@@ -72,9 +73,9 @@ class PageViewPage extends StatelessWidget {
                         Get.to(
                             ImageViewPage(_pageController.listPost[index].img));
                       },
-                      child: FadeInImage.assetNetwork(
+                      child: FadeInImage.memoryNetwork(
                         image: _pageController.listPost[index].img,
-                        placeholder: "assets/images/white.png",
+                        placeholder: kTransparentImage,
                         fit: BoxFit.fitWidth,
                       ),
                     ),

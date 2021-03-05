@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ImageViewPage extends StatelessWidget {
   final String _img;
@@ -31,13 +33,11 @@ class ImageViewPage extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          child: FadeInImage.assetNetwork(
-            image: _img.replaceFirst(RegExp("size=m"), "size=l", 10),
-            placeholder: "assets/images/white.png",
-            fit: BoxFit.fitWidth,
-          ),
+        child: FadeInImage.memoryNetwork(
+          image: this._img,
+          placeholder: kTransparentImage,
+          width: Get.width,
+          fit: BoxFit.fitWidth,
         ),
       ),
     );

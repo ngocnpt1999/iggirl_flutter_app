@@ -1,26 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iggirl_flutter_app/control/imageAliveView.dart';
-import 'package:iggirl_flutter_app/controller/controller.dart';
-import 'package:iggirl_flutter_app/imageView.dart';
+import 'package:iggirl_flutter_app/controller/state_management.dart';
+import 'package:iggirl_flutter_app/image_view.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ListGirlPage extends StatelessWidget {
   ListGirlPage();
 
   final int _num = 8;
 
-  final ListPostController _pageController = ListPostController();
+  final ListPostController _pageController = Get.find();
 
   final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      double max = _scrollController.position.maxScrollExtent;
+      double current = _scrollController.position.pixels;
+      if (max - current <= Get.height / 3) {
         _pageController.loadNewPosts(_num);
       }
     });
@@ -153,7 +154,12 @@ class ListGirlPage extends StatelessWidget {
           onTap: () {
             Get.to(ImageViewPage(_pageController.listPost[index].img));
           },
-          child: ImageAliveView(_pageController.listPost[index].img),
+          child: FadeInImage.memoryNetwork(
+            image: _pageController.listPost[index].img,
+            placeholder: kTransparentImage,
+            width: Get.width,
+            fit: BoxFit.fitWidth,
+          ),
         ),
       ],
     );

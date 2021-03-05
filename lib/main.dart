@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iggirl_flutter_app/controller/controller.dart';
+import 'package:iggirl_flutter_app/controller/state_management.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,7 +37,7 @@ class MyHomePage extends StatelessWidget {
 
   final String title;
 
-  final NavigationTabController _pageController = NavigationTabController();
+  final HomeController _pageController = HomeController();
 
   @override
   Widget build(BuildContext context) {

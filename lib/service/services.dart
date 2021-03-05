@@ -22,9 +22,8 @@ class Services {
     } else if (!photosStatus.isGranted && Platform.isIOS) {
       await Permission.photos.request();
     } else {
-      String hdUri = uri.replaceFirst(RegExp("size=m"), "size=l", 10);
       var response = await Dio()
-          .get(hdUri, options: Options(responseType: ResponseType.bytes));
+          .get(uri, options: Options(responseType: ResponseType.bytes));
       var result;
       ImageGallerySaver.saveImage(Uint8List.fromList(response.data),
               quality: 100, name: randomString(15))

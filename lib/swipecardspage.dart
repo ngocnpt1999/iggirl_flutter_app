@@ -2,17 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:get/get.dart';
-import 'package:iggirl_flutter_app/controller/controller.dart';
-import 'package:iggirl_flutter_app/imageView.dart';
+import 'package:iggirl_flutter_app/controller/state_management.dart';
+import 'package:iggirl_flutter_app/image_view.dart';
 import 'package:iggirl_flutter_app/service/services.dart';
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class SwipeCardsPage extends StatelessWidget {
   SwipeCardsPage();
 
-  final int _num = 5;
+  final int _num = 8;
 
-  final ListPostController _pageController = ListPostController();
+  final ListPostController _pageController = Get.find();
 
   final CardController _controller = CardController();
 
@@ -39,7 +40,7 @@ class SwipeCardsPage extends StatelessWidget {
         if (_pageController.listPost.length > 0) {
           return Center(
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.6,
+              height: Get.height * 0.6,
               child: TinderSwapCard(
                 swipeUp: true,
                 swipeDown: true,
@@ -47,10 +48,10 @@ class SwipeCardsPage extends StatelessWidget {
                 totalNum: _pageController.listPost.length,
                 stackNum: 5,
                 swipeEdge: 6.0,
-                maxWidth: MediaQuery.of(context).size.width * 0.9,
-                maxHeight: MediaQuery.of(context).size.width * 0.9,
-                minWidth: MediaQuery.of(context).size.width * 0.8,
-                minHeight: MediaQuery.of(context).size.width * 0.8,
+                maxWidth: Get.width * 0.9,
+                maxHeight: Get.width * 0.9,
+                minWidth: Get.width * 0.8,
+                minHeight: Get.width * 0.8,
                 cardBuilder: _buildPostView,
                 cardController: _controller,
                 swipeCompleteCallback:
@@ -84,9 +85,9 @@ class SwipeCardsPage extends StatelessWidget {
             onTap: () {
               Get.to(ImageViewPage(_pageController.listPost[index].img));
             },
-            child: FadeInImage.assetNetwork(
+            child: FadeInImage.memoryNetwork(
               image: _pageController.listPost[index].img,
-              placeholder: "assets/images/white.png",
+              placeholder: kTransparentImage,
               fit: BoxFit.cover,
             ),
           ),

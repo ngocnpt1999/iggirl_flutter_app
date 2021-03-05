@@ -20,32 +20,27 @@ class Database {
 
   String _accessToken = "";
 
-  List<String> _links = List();
+  Client _client = Client();
 
-  Future<List<Post>> getNewPosts() async {
-    Client client = Client();
-    List<Post> newPosts = List();
-    for (int i = 0; i < _links.length; i++) {
-      try {
-        var response = await client.get(
-            "https://graph.facebook.com/v9.0/instagram_oembed?url=" +
-                _links[i] +
-                "&access_token=" +
-                _accessToken);
-        if (response.statusCode == 200) {
-          var value = json.decode(response.body);
-          newPosts.add(Post(
-            value["author_name"].toString(),
-            "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
-            value["thumbnail_url"].toString(),
-          ));
-        }
-      } catch (ex) {
-        print(ex);
+  Future<List<Post>> getNewPosts(List<String> links) async {
+    List<Post> newPosts = [];
+    for (int i = 0; i < links.length; i++) {
+      var response = await _client.get(
+          "https://graph.facebook.com/v9.0/instagram_oembed?url=" +
+              links[i] +
+              "&access_token=" +
+              _accessToken);
+      if (response.statusCode == 200) {
+        var value = json.decode(response.body);
+        newPosts.add(Post(
+          value["author_name"].toString(),
+          "https://f0.pngfuel.com/png/863/426/instagram-logo-png-clip-art.png",
+          value["thumbnail_url"].toString(),
+        ));
+      } else {
         continue;
       }
     }
-    _links.clear();
     return newPosts;
   }
 
@@ -71,9 +66,6 @@ class Database {
       print(db.value);
       _accessToken = db.value.toString();
     }
-    if (_links.length > 0) {
-      return _links;
-    }
     var db = await FirebaseDatabase.instance
         .reference()
         .child("links")
@@ -82,7 +74,7 @@ class Database {
         .limitToFirst(count)
         .once();
     print(db.value);
-    List<String> newLinks = List();
+    List<String> newLinks = [];
     if (db.value is Map) {
       Map values = db.value;
       values.forEach((key, value) {
@@ -91,7 +83,7 @@ class Database {
               .add("https://www.instagram.com/p/" + value["link"].toString());
         }
       });
-      return _links = _shuffleData(newLinks);
+      return _shuffleData(newLinks);
     } else {
       List<dynamic> values = db.value;
       values.forEach((element) {
@@ -100,7 +92,7 @@ class Database {
           newLinks.add("https://www.instagram.com/p/" + map["link"].toString());
         }
       });
-      return _links = _shuffleData(newLinks);
+      return _shuffleData(newLinks);
     }
   }
 }

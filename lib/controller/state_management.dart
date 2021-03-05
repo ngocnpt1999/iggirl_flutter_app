@@ -5,16 +5,21 @@ import 'package:iggirl_flutter_app/model/database.dart';
 import 'package:iggirl_flutter_app/pageviewpage.dart';
 import 'package:iggirl_flutter_app/swipecardspage.dart';
 
-class NavigationTabController extends GetxController {
-  NavigationTabController();
+class HomeController extends GetxController {
+  HomeController() {
+    _controller = Get.put(ListPostController());
+    widgets = <Widget>[
+      PageViewPage(),
+      ListGirlPage(),
+      SwipeCardsPage(),
+    ];
+  }
+
+  ListPostController _controller;
 
   var selectedWidget = 0.obs;
 
-  List<Widget> widgets = <Widget>[
-    PageViewPage(),
-    ListGirlPage(),
-    SwipeCardsPage(),
-  ];
+  List<Widget> widgets;
 
   void changeTab(int value) {
     selectedWidget.value = value;
@@ -24,24 +29,24 @@ class NavigationTabController extends GetxController {
 class ListPostController extends GetxController {
   ListPostController();
 
-  int _counter = 0;
+  int _start = 0;
 
   bool _isBusy = false;
 
-  var listPost = List<Post>().obs;
+  var listPost = <Post>[].obs;
 
-  void loadNewPosts(int number) {
+  void loadNewPosts(int num) {
     if (_isBusy == true) {
       return;
     }
-
+    //
     _isBusy = true;
-    Database().fetchData(_counter, number).whenComplete(() async {
-      List<Post> newPosts = await Database().getNewPosts();
+    Database().fetchData(_start, num).then((links) async {
+      List<Post> newPosts = await Database().getNewPosts(links);
       listPost.addAll(newPosts);
       _isBusy = false;
-      _counter += number;
-      print("Counter: $_counter");
+      _start += num;
+      print("Counter: $_start");
     });
   }
 }
