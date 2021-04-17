@@ -15,7 +15,7 @@ class HomeController extends GetxController {
     ];
   }
 
-  ListPostController _controller;
+  ListPostController _controller; //don't remove this line
 
   var selectedWidget = 0.obs;
 
